@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cart - ShopSmart Pro</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Your Cart</h1>
+    <a href="index.html">🔙 Back to Shopping</a>
+  </header>
+
+  <main id="cartItems"></main>
+
+  <div id="checkoutArea" style="padding: 1rem;">
+    <button onclick="startCheckout()">Proceed to Pay</button>
+  </div>
+
+  <script>
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const cartDiv = document.getElementById("cartItems");
+    let total = 0;
+
+    cart.forEach((item) => {
+      total += item.price;
+      const div = document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `<h3>${item.name}</h3><p>₹${item.price}</p>`;
+      cartDiv.appendChild(div);
+    });
+
+    const totalDiv = document.createElement("div");
+    totalDiv.className = "product";
+    totalDiv.innerHTML = `<h2>Total: ₹${total}</h2>`;
+    cartDiv.appendChild(totalDiv);
+
+    function startCheckout() {
+      const saved = JSON.parse(localStorage.getItem("paymentCreds"));
+
+      if (saved) {
+        const useSaved = confirm("Use saved payment credentials?");
+        if (useSaved) {
+          confirmPayment(saved);
+          return;
+        }
+      }
+
+      showCredentialForm();
+    }
+
+    function showCredentialForm() {
+      const div = document.getElementById("checkoutArea");
+      div.innerHTML = `
+        <h3>Enter Payment Details</h3>
+        <input type="email" id="email" placeholder="Email" required><br><br>
+        <input type="text" id="card" placeholder="Card Number" required><br><br>
+        <button onclick="saveAndPay()">Pay Now</button>
+      `;
+    }
+
+    function saveAndPay() {
+      const email = document.getElementById("email").value;
+      const card = document.getElementById("card").value;
+
+      if (!email || !card) {
+        alert("Please enter all payment details");
+        return;
+      }
+
+      const creds = { email, card };
+      localStorage.setItem("paymentCreds", JSON.stringify(creds));
+      confirmPayment(creds);
+    }
+
+    function confirmPayment(creds) {
+      alert(`✅ Payment done using:\nEmail: ${creds.email}\nCard ending in ****${creds.card.slice(-4)}`);
+      localStorage.removeItem("cart");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

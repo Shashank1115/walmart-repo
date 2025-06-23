@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile - ShopSmart Pro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>👤 Your Profile</h1>
+    <a href="index.html">🏠 Back to Home</a>
+  </header>
+
+  <main style="padding: 1rem;">
+    <section id="profileInfo">
+      <h2>Update Profile</h2>
+      <label>Name:</label>
+      <input type="text" id="userName" placeholder="Enter your name"><br><br>
+
+      <label>Email:</label>
+      <input type="email" id="emailInput" placeholder="Enter your email"><br><br>
+
+      <label>Card Number:</label>
+      <input type="text" id="cardInput" placeholder="Enter card number"><br><br>
+
+      <button onclick="saveProfile()">💾 Save Profile</button>
+    </section>
+
+    <section id="savedProfile" style="margin-top: 2rem;">
+      <h2>Saved Info</h2>
+      <p><strong>Name:</strong> <span id="displayName">-</span></p>
+      <p><strong>Email:</strong> <span id="displayEmail">-</span></p>
+      <p><strong>Card Ending:</strong> <span id="displayCard">-</span></p>
+    </section>
+  </main>
+
+  <script>
+    function saveProfile() {
+      const name = document.getElementById("userName").value;
+      const email = document.getElementById("emailInput").value;
+      const card = document.getElementById("cardInput").value;
+
+      if (!name || !email || !card) {
+        alert("Please fill out all fields.");
+        return;
+      }
+
+      localStorage.setItem("userName", name);
+      localStorage.setItem("paymentCreds", JSON.stringify({ email, card }));
+
+      alert("✅ Profile saved!");
+      loadProfile();
+    }
+
+    function loadProfile() {
+      const name = localStorage.getItem("userName") || "-";
+      const creds = JSON.parse(localStorage.getItem("paymentCreds") || '{}');
+
+      document.getElementById("displayName").innerText = name;
+      document.getElementById("displayEmail").innerText = creds.email || "-";
+      document.getElementById("displayCard").innerText = creds.card ? "****" + creds.card.slice(-4) : "-";
+    }
+
+    window.onload = loadProfile;
+  </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ShopSmart Pro - Mock Store</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Floating Chatbot Button */
+    #chatbotButton {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 26px;
+      font-size: 15px;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Chatbox container */
+    #chatbox {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 500px;
+      height: 600px;
+      background-color: #fdfdfd;
+      border-radius: 16px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+      z-index: 1000;
+      padding: 18px;
+      animation: floatUp 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    #chatbox h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      text-align: center;
+      color: #333;
+    }
+
+    #chatLog {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 15px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    #chatLog p {
+      padding: 10px 14px;
+      border-radius: 10px;
+      max-width: 80%;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    #chatLog p:nth-child(odd) {
+      background-color: #e9f5ff;
+      align-self: flex-start;
+    }
+
+    #chatLog p:nth-child(even) {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+    }
+
+    #chatInput {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+
+    .chat-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .chat-buttons button,
+    .chat-buttons input[type=file] {
+      flex: 1;
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .mic-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .mic-btn.off {
+      background-color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ShopSmart Pro</h1>
+    <input type="text" id="searchInput" placeholder="Search for products..." />
+    <button onclick="searchProducts()">Search</button>
+    <button onclick="startVoiceInput()">🎤 Voice</button>
+    <a href="cart.html">🛒 View Cart</a>
+    <a href="profile.html">👤 Profile</a>
+  </header>
+
+  <section id="features" class="features">
+    <h2>Key Features</h2>
+    <ul>
+      <li>🔍 Smart Search: Just type or speak the product name.</li>
+      <li>🛒 One-Click Add to Cart: Easily add products to your cart.</li>
+      <li>💳 Seamless Payment: Proceed with saved credentials securely.</li>
+      <li>🤖 Chat Assistance: Ask our bot anything about your shopping journey.</li>
+      <li>🗺️ Navigation Help: Can’t find something? Ask the bot for directions.</li>
+    </ul>
+  </section>
+
+  <main id="productList"></main>
+
+  <!-- Floating Chatbot Button -->
+  <button id="chatbotButton" onclick="toggleChatbox()">💬 How may I assist you?</button>
+
+  <!-- Chatbot UI -->
+  <div id="chatbox" aria-live="polite" role="region" aria-label="Chatbot conversation window">
+    <h3>Smart Assistant</h3>
+    <div id="chatLog" tabindex="0"></div>
+    <input type="text" id="chatInput" placeholder="Type your message..." aria-label="Chat input" />
+    <div class="chat-buttons">
+      <button onclick="sendChat()">Send</button>
+      <button id="micToggle" class="mic-btn" onclick="toggleMic()">🎤 Mic On</button>
+      <input type="file" id="chatImageUpload" accept="image/*" aria-label="Upload image" onchange="handleChatImageUpload(event)" />
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <script src="scripts.js"></script>
+  <script>
+    let micOn = false;
+    let recognition;
+
+    function toggleChatbox() {
+      const chatbox = document.getElementById("chatbox");
+      chatbox.style.display = chatbox.style.display === "none" || chatbox.style.display === "" ? "block" : "none";
+      if (chatbox.style.display === "block") document.getElementById("chatInput").focus();
+    }
+
+    function toggleMic() {
+      micOn = !micOn;
+      const micBtn = document.getElementById("micToggle");
+
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Speech Recognition not supported in this browser.");
+        return;
+      }
+
+      if (micOn) {
+        micBtn.textContent = "🎤 Mic Off";
+        micBtn.classList.add("off");
+        startChatVoice();
+      } else {
+        micBtn.textContent = "🎤 Mic On";
+        micBtn.classList.remove("off");
+        if (recognition) recognition.stop();
+      }
+    }
+
+    function startChatVoice() {
+      recognition = new webkitSpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[event.results.length - 1][0].transcript;
+        document.getElementById("chatInput").value = transcript;
+        sendChat();
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error", event.error);
+      };
+
+      recognition.start();
+    }
+
+    // Send message on Enter key
+    document.getElementById("chatInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendChat();
+      }
+    });
+
+    // Handle image upload and OCR
+    function handleChatImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        const imageData = reader.result;
+        const chatLog = document.getElementById("chatLog");
+        chatLog.innerHTML += `<p><strong>You uploaded:</strong><br><img src="${imageData}" style="max-width: 200px;"></p>`;
+
+        Tesseract.recognize(
+          imageData,
+          'eng',
+          { logger: m => console.log(m) }
+        ).then(({ data: { text } }) => {
+          const cleaned = text.trim().toLowerCase();
+          document.getElementById("chatInput").value = cleaned;
+          document.getElementById("searchInput").value = cleaned;
+          searchProducts();
+          sendChat();
+        }).catch(err => {
+          console.error("OCR failed:", err);
+          chatLog.innerHTML += `<p><strong>Bot:</strong> Sorry, I couldn't read the text from the image.</p>`;
+        });
+      };
+
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
