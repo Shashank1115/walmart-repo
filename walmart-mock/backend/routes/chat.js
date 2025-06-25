@@ -1,8 +1,12 @@
+// backend/routes/chat.js
+
 const express = require("express");
 const router = express.Router();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-// Your actual product catalog
+// Ensure you have this in your backend/server.js
+// require("dotenv").config();
+
 const productCatalog = [
   { name: "Coca-Cola Bottle", price: 20 },
   { name: "Amul Milk 1L", price: 50 },
@@ -10,8 +14,7 @@ const productCatalog = [
   { name: "India Gate Rice 1kg", price: 90 }
 ];
 
-// Convert catalog to string
-const catalogString = productCatalog.map(p => `${p.name} - ₹${p.price}`).join('\n');
+const catalogString = productCatalog.map(p => `${p.name} — ₹${p.price}`).join("\n");
 
 router.post("/", async (req, res) => {
   const userMessage = req.body.message;
@@ -28,14 +31,11 @@ router.post("/", async (req, res) => {
         messages: [
           {
             role: "system",
-        content: `
+            content: `
 You are a shopping assistant for ShopSmart Pro.
 
 📌 PRODUCT CATALOG (use ONLY these, no other products or prices):
-- Coca-Cola Bottle — ₹20
-- Amul Milk 1L — ₹50
-- Basmati Rice 1kg — ₹80
-- India Gate Rice 1kg — ₹90
+${catalogString}
 
 🔒 RULES:
 - Do NOT invent products, brands, variants (like Amul Gold, Slim, etc), or prices.
@@ -57,10 +57,8 @@ You are a shopping assistant for ShopSmart Pro.
   Bot: Sorry, we don’t have that product.
 
 Keep it clean and only respond to what was asked.
-- DO NOT GENERATE OTHER INFORMATION 
-`
-
-},
+            `
+          },
           {
             role: "user",
             content: userMessage
@@ -70,9 +68,17 @@ Keep it clean and only respond to what was asked.
     });
 
     const data = await groqRes.json();
-    res.json({ reply: data.choices[0].message.content });
+
+    if (!data.choices || !data.choices[0]) {
+      console.error("❌ Invalid response from Groq:", data);
+      return res.status(500).json({ reply: "Sorry, Groq gave an invalid response." });
+    }
+
+    const reply = data.choices[0].message.content;
+    res.json({ reply });
+
   } catch (err) {
-    console.error("Groq API error:", err);
+    console.error("❌ Groq API error:", err);
     res.status(500).json({ reply: "Sorry, something went wrong." });
   }
 });

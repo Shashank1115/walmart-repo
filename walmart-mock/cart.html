@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <title>Cart - ShopSmart Pro</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <header>
-    <h1>Your Cart</h1>
-    <a href="index.html">🔙 Back to Shopping</a>
+<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+
+  <header class="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center">
+    <h1 class="text-2xl font-bold">🛒 Your Cart</h1>
+    <a href="index.html" class="text-white bg-blue-800 px-4 py-2 rounded hover:bg-blue-700">🔙 Back to Shopping</a>
   </header>
 
-  <main id="cartItems"></main>
+  <main id="cartItems" class="flex-grow p-6 space-y-6"></main>
 
-  <div id="checkoutArea" style="padding: 1rem;">
-    <button onclick="startCheckout()">Proceed to Pay</button>
+  <div id="checkoutArea" class="bg-white p-6 border-t shadow-md">
+    <button onclick="startCheckout()" class="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 text-lg">💳 Proceed to Pay</button>
   </div>
 
   <script>
@@ -32,18 +34,18 @@
       total += lineTotal;
 
       const div = document.createElement("div");
-      div.className = "product";
+      div.className = "bg-white rounded-lg shadow p-6 border border-gray-200";
       div.innerHTML = `
-        <h3>${item.name}</h3>
-        <p>Quantity: ${item.quantity} → ${totalUnit}${unitLabel}</p>
-        <p>Subtotal: ₹${lineTotal}</p>
+        <h3 class="text-xl font-semibold mb-2">${item.name}</h3>
+        <p class="text-gray-700">Quantity: <strong>${item.quantity}</strong> → ${totalUnit}${unitLabel}</p>
+        <p class="text-gray-800 font-medium">Subtotal: ₹${lineTotal}</p>
       `;
       cartDiv.appendChild(div);
     });
 
     const totalDiv = document.createElement("div");
-    totalDiv.className = "product";
-    totalDiv.innerHTML = `<h2>Total: ₹${total}</h2>`;
+    totalDiv.className = "bg-yellow-100 border-l-4 border-yellow-500 p-4 mt-4";
+    totalDiv.innerHTML = `<h2 class="text-xl font-bold text-yellow-800">Total: ₹${total}</h2>`;
     cartDiv.appendChild(totalDiv);
 
     function startCheckout() {
@@ -61,10 +63,12 @@
     function showCredentialForm() {
       const div = document.getElementById("checkoutArea");
       div.innerHTML = `
-        <h3>Enter Payment Details</h3>
-        <input type="email" id="email" placeholder="Email" required><br><br>
-        <input type="text" id="card" placeholder="Card Number" required><br><br>
-        <button onclick="saveAndPay()">Pay Now</button>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-4">Enter Payment Details</h3>
+          <input type="email" id="email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded mb-3" required>
+          <input type="text" id="card" placeholder="Card Number" class="w-full p-3 border border-gray-300 rounded mb-4" required>
+          <button onclick="saveAndPay()" class="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700">💳 Pay Now</button>
+        </div>
       `;
     }
 
