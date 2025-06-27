@@ -47,7 +47,14 @@
   <!-- Chatbox UI -->
   <div id="chatbox" class="hidden fixed bottom-24 right-5 w-[90%] sm:w-[400px] h-[550px] bg-white rounded-xl shadow-xl flex flex-col p-4 z-50">
     <h3 class="text-lg font-semibold text-center mb-2">Smart Assistant</h3>
-    <div id="chatLog" class="flex-1 overflow-y-auto border rounded p-2 bg-gray-50 space-y-2 text-sm"></div>
+    <div id="chatLog" class="flex-1 overflow-y-auto border rounded p-2 bg-gray-50 space-y-2 text-sm">
+  <div id="modeSelection" class="text-center">
+    <p class="mb-2 font-semibold">🧠 Choose a mode to begin:</p>
+    <button onclick="setChatMode('order')" class="bg-blue-600 text-white px-4 py-2 rounded mr-2 hover:bg-blue-700">🛒 Order Chat</button>
+    <button onclick="setChatMode('general')" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">💬 General Chat</button>
+  </div>
+</div>
+
     <input id="chatInput" type="text" placeholder="Type your message..."
       class="border mt-3 px-4 py-2 rounded w-full" />
     <div class="flex gap-2 mt-2">
@@ -65,14 +72,46 @@
   <script>
     let micOn = false;
     let recognition;
+    // let chatMode = null; 
+    let currentMode = null;
 
-    function toggleChatbox() {
-      const chatbox = document.getElementById("chatbox");
-      chatbox.classList.toggle("hidden");
-      if (!chatbox.classList.contains("hidden")) {
-        document.getElementById("chatInput").focus();
-      }
-    }
+
+
+function setMode(mode) {
+  currentMode = mode;
+  const chatLog = document.getElementById("chatLog");
+
+  // Clear initial buttons
+  chatLog.innerHTML += `<hr />`;
+
+  if (mode === "order") {
+    chatLog.innerHTML += `<p><strong>Bot:</strong> You’re now in <strong>Shopping Mode</strong>. Ask to add items from the catalog.</p>`;
+  } else {
+    chatLog.innerHTML += `<p><strong>Bot:</strong> You’re now in <strong>General Query Mode</strong>. Ask anything about app features.</p>`;
+  }
+
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+
+function toggleChatbox() {
+  const chatbox = document.getElementById("chatbox");
+  chatbox.classList.toggle("hidden");
+
+  if (!chatbox.classList.contains("hidden")) {
+    // Ask user to choose mode
+    document.getElementById("chatLog").innerHTML = `
+      <p><strong>Bot:</strong> Please select a mode:</p>
+      <div class="flex gap-2 mt-2">
+        <button onclick="setMode('general')" class="bg-purple-600 text-white px-3 py-1 rounded">💡 General Query</button>
+        <button onclick="setMode('order')" class="bg-green-600 text-white px-3 py-1 rounded">🛒 Shopping Mode</button>
+      </div>
+    `;
+  }
+}
+
+
+
 
     function toggleMic() {
       micOn = !micOn;

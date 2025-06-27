@@ -2,6 +2,8 @@
 
 const express = require("express");
 const router = express.Router();
+//const mode = req.body.mode || "order"; // default to 'order' for backward compatibility
+
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 // Ensure you have this in your backend/server.js
@@ -39,12 +41,17 @@ ${catalogString}
 
 🔒 RULES:
 - Do NOT invent products, brands, variants (like Amul Gold, Slim, etc), or prices.
-- If the requested item isn't in this list, respond: "Sorry, we don’t have that product."
+
 - Never assume variants or suggest extra options.
 - Only reply once per message.
 - Be concise and accurate.
 - Format your response like this:
   "Added 2 x Amul Milk 1L (₹50 each) to your cart. Total: ₹100."
+-  Assume quantities like "2kg basmati rice" mean 2 units of "Basmati Rice 1kg", if a close match exists in the catalog.
+- If the requested item isn't in this list, respond: "Sorry, we don’t have that product."
++ If the requested item isn't in this list **but seems like a variation of an existing product** (e.g., "2kg basmati rice" → "Basmati Rice 1kg"), respond:
++ "Sorry, we don’t have that product. (Basmati Rice is only available in 1kg pack)"
+
 
 📦 EXAMPLES:
 - User: add 3 basmati rice  
@@ -55,6 +62,14 @@ ${catalogString}
 
 - User: add 1 gold milk  
   Bot: Sorry, we don’t have that product.
+-  Assume quantities like "2kg basmati rice" mean 2 units of "Basmati Rice 1kg", if a close match exists in the catalog.
+- User: add 2kg basmati rice 
+  Bot: Added 2 x Basmati Rice 1kg (₹80 each) to your cart. Total: ₹160.
+  
+- If the requested item isn't in this list, respond: "Sorry, we don’t have that product."
++ If the requested item isn't in this list **but seems like a variation of an existing product** (e.g., "2kg basmati rice" → "Basmati Rice 1kg"), respond:
++ "Sorry, we don’t have that product. (Basmati Rice is only available in 1kg pack)"
+
 
 Keep it clean and only respond to what was asked.
             `

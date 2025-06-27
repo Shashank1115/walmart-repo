@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -23,6 +24,7 @@ const profileRoutes = require("./routes/profile");
 app.use("/api/products", productRoutes);
 app.use("/chat", chatRoutes);        // <-- POST /chat from scripts.js
 app.use("/profile", profileRoutes);  // <-- POST /profile/save and GET /profile/get
+app.use("/general", require("./routes/general"));
 
 // Run server
 const PORT = 4000;
