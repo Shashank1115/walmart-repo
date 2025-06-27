@@ -15,6 +15,7 @@ async function renderProducts() {
   }
 }
 
+
 function renderProductList(list) {
   const productList = document.getElementById("productList");
   productList.innerHTML = "";
