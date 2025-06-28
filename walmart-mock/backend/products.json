@@ -1,27 +1,127 @@
 [
   {
-    "name": "Coca-Cola Bottle",
-    "price": 20,
+    "name": "India Gate Basmati Rice 1kg",
+    "price": 90,
     "image": "https://via.placeholder.com/100"
   },
   {
-    "name": "Pepsi Can",
-    "price": 25,
+    "name": "Daawat Biryani Rice 1kg",
+    "price": 100,
     "image": "https://via.placeholder.com/100"
   },
   {
-    "name": "Basmati Rice 1kg",
-    "price": 80,
+    "name": "Fortune Everyday Rice 1kg",
+    "price": 85,
     "image": "https://via.placeholder.com/100"
   },
   {
-    "name": "Toothpaste",
+    "name": "Kohinoor Silver Basmati Rice 1kg",
+    "price": 95,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Tilda Premium Basmati Rice 1kg",
+    "price": 110,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Parle-G Biscuits 500g",
+    "price": 40,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Good Day Butter Biscuit",
+    "price": 50,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Hide & Seek Fab Biscuit",
     "price": 45,
     "image": "https://via.placeholder.com/100"
   },
   {
-    "name": "Handwash",
+    "name": "Treat Strawberry Biscuit",
+    "price": 35,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Marie Gold Biscuit",
+    "price": 30,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Dettol Soap 125g",
+    "price": 35,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Lux Soap 100g",
+    "price": 25,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Lifebuoy Red Soap",
+    "price": 28,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Cinthol Lime Soap",
+    "price": 32,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Pears Pure & Gentle Soap",
+    "price": 38,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Real Mixed Fruit Juice 1L",
+    "price": 120,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Tropicana Orange Juice 1L",
+    "price": 110,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Minute Maid Pulpy Orange Juice",
+    "price": 90,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "B Natural Mango Juice 1L",
+    "price": 100,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Paper Boat Aamras Juice",
+    "price": 85,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Amul Taaza Milk 1L",
     "price": 60,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Mother Dairy Milk 1L",
+    "price": 58,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Nandini Toned Milk",
+    "price": 55,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Heritage Full Cream Milk",
+    "price": 65,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Aavin Milk 1L",
+    "price": 57,
     "image": "https://via.placeholder.com/100"
   }
 ]
