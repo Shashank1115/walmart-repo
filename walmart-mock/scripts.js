@@ -1,4 +1,5 @@
-let products = []; // Needed for search, cart, etc.
+let products = [];  // All products from backend
+let fuse = null;    // Will hold Fuse instance
 const BACKEND_URL = "http://localhost:4000";
 
 async function renderProducts() {
@@ -8,13 +9,17 @@ async function renderProducts() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/products`);
     products = await res.json();
+
+    fuse = new Fuse(products, {
+      keys: ['name'],
+      threshold: 0.4,
+    });
     renderProductList(products);
   } catch (err) {
     console.error("Error loading products:", err);
     productList.innerHTML = "<p class='text-red-600'>Failed to load products.</p>";
   }
 }
-
 
 function renderProductList(list) {
   const productList = document.getElementById("productList");
@@ -34,11 +39,14 @@ function renderProductList(list) {
 }
 
 function searchProducts() {
-  const input = document.getElementById("searchInput").value.toLowerCase();
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(input)
-  );
-  renderProductList(filtered);
+  const input = document.getElementById("searchInput").value.trim();
+  if (!input) {
+    renderProductList(products);
+    return;
+  }
+  const results = fuse.search(input);
+  const matchedProducts = results.map(result => result.item);
+  renderProductList(matchedProducts);
 }
 
 function addToCart(id, quantity = 1) {
@@ -64,20 +72,18 @@ function showCart() {
 }
 
 function parseShoppingList(text) {
-  const productsList = [
-    "Basmati Rice",
-    "Amul Milk",
-    "Coca-Cola Bottle",
-    "India Gate Rice"
-  ];
+  if (!products || products.length === 0) return [];
 
   const items = [];
   const seen = new Set();
 
-  for (const name of productsList) {
-    const regex = new RegExp(`(\\d+)?\\s*(kg|l|liters?|packs?|bottles?)?\\s*(?:of\\s*)?${name}|${name}\\s*(\\d+)\\s*(kg|l|liters?|packs?|bottles?)?`, "gi");
-    let match;
+  products.forEach(({ name }) => {
+    const regex = new RegExp(
+      `(\\d+)?\\s*(kg|l|liters?|packs?|bottles?)?\\s*(?:of\\s*)?${name}|${name}\\s*(\\d+)\\s*(kg|l|liters?|packs?|bottles?)?`,
+      "gi"
+    );
 
+    let match;
     while ((match = regex.exec(text)) !== null) {
       const quantity = parseInt(match[1] || match[3]) || 1;
       const unit = match[2] || match[4] || "";
@@ -88,48 +94,74 @@ function parseShoppingList(text) {
         seen.add(key);
       }
     }
-  }
+  });
 
   return items;
 }
 
 function simulateOrderFromChat(productName, requestedQuantity = 1) {
-  const searchBar = document.getElementById("searchInput");
-  searchBar.value = productName;
+  const chatLog = document.getElementById("chatLog");
 
-  setTimeout(() => {
-    searchProducts();
-  }, 200);
+  // Search using Fuse
+  const results = fuse.search(productName);
 
-  setTimeout(() => {
-    const matches = [...document.querySelectorAll("#productList > div")];
-    const keywords = productName.toLowerCase().split(/\s+/);
+  if (results.length === 0) {
+    chatLog.innerHTML += `<p><strong>Bot:</strong> Sorry, we don’t have that product.</p>`;
+    chatLog.scrollTop = chatLog.scrollHeight;
+    return;
+  }
 
-    const target = matches.find(p => {
-      const title = p.querySelector("h3")?.textContent.toLowerCase();
-      return keywords.every(k => title?.includes(k));
-    });
+  // 🧠 Check for multiple results for generic terms like "rice"
+  const matchedNames = results.map(r => r.item.name.toLowerCase());
+  const uniqueNames = [...new Set(matchedNames)];
 
-    if (target) {
-      const title = target.querySelector("h3").textContent;
-      // const matched = products.find(p => p.name.toLowerCase() === title.toLowerCase());
-      const matched = products.find(p =>
-  p.name.toLowerCase().includes(productName.toLowerCase())
-);
+  if (uniqueNames.length > 1) {
+    // Show dropdown for multiple options
+    const selectId = `select_${Date.now()}`;
+    const options = results.map(r =>
+      `<option value="${r.item._id}">${r.item.name} (₹${r.item.price})</option>`
+    ).join("");
 
+    chatLog.innerHTML += `
+      <p><strong>Bot:</strong> Multiple products found for "<strong>${productName}</strong>". Please select one:</p>
+      <div class="flex items-center gap-2 mt-1">
+        <select id="${selectId}" class="border px-2 py-1 rounded w-full">${options}</select>
+        <button onclick="confirmDropdownSelection('${selectId}', ${requestedQuantity})"
+          class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+          Add to Cart
+        </button>
+      </div>
+    `;
+    chatLog.scrollTop = chatLog.scrollHeight;
+    return;
+  }
 
-      if (matched) {
-        const skuMatch = matched.name.match(/(\\d+)\\s*(kg|l|liter|bottle|pack)/i);
-        const skuUnit = skuMatch ? parseInt(skuMatch[1]) : 1;
-        const unitsToAdd = Math.ceil(requestedQuantity / skuUnit);
+  // ✅ Only one good match, proceed to auto add
+  const matched = results[0].item;
+  const skuMatch = matched.name.match(/(\d+)\s*(kg|l|liter|bottle|pack)/i);
+  const skuUnit = skuMatch ? parseInt(skuMatch[1]) : 1;
+  const unitsToAdd = Math.ceil(requestedQuantity / skuUnit);
 
-        console.log(`🛒 Adding ${unitsToAdd} of "${matched.name}" for requested ${requestedQuantity}`);
-        addToCart(matched._id, unitsToAdd);
-      }
-    } else {
-      console.warn(`❌ Product "${productName}" not found`);
-    }
-  }, 1000);
+  addToCart(matched._id, unitsToAdd);
+  chatLog.innerHTML += `<p><strong>Bot:</strong> Added ${unitsToAdd} x ${matched.name} (₹${matched.price} each) to your cart. Total: ₹${matched.price * unitsToAdd}.</p>`;
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function confirmDropdownSelection(selectId, quantity) {
+  const select = document.getElementById(selectId);
+  const selectedId = select.value;
+  const item = products.find(p => p._id === selectedId);
+  if (!item) return;
+
+  const skuMatch = item.name.match(/(\d+)\s*(kg|l|liter|bottle|pack)/i);
+  const skuUnit = skuMatch ? parseInt(skuMatch[1]) : 1;
+  const unitsToAdd = Math.ceil(quantity / skuUnit);
+
+  addToCart(item._id, unitsToAdd);
+
+  const chatLog = document.getElementById("chatLog");
+  chatLog.innerHTML += `<p><strong>Bot:</strong> Added ${unitsToAdd} x ${item.name} (₹${item.price} each) to your cart. Total: ₹${item.price * unitsToAdd}.</p>`;
+  chatLog.scrollTop = chatLog.scrollHeight;
 }
 
 function queueProductSimulations(items) {
@@ -137,7 +169,7 @@ function queueProductSimulations(items) {
   items.forEach((item, index) => {
     if (!added.has(item.name.toLowerCase())) {
       setTimeout(() => {
-        simulateOrderFromChat(item.name, item.quantity, item.unit);
+        simulateOrderFromChat(item.name, item.quantity);
       }, index * 1500);
       added.add(item.name.toLowerCase());
     }
@@ -184,10 +216,9 @@ function handleImageUpload(event) {
     imgPreview.style.display = "block";
 
     Tesseract.recognize(imageData, 'eng', {
+      tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ',
       logger: m => console.log(m)
     }).then(({ data: { text } }) => {
-      console.log("Extracted text:", text);
-
       const items = parseShoppingList(text);
 
       if (items.length === 0) {
@@ -205,39 +236,6 @@ function handleImageUpload(event) {
   reader.readAsDataURL(file);
 }
 
-// async function sendChat() {
-//   const userMsg = document.getElementById("chatInput").value.trim();
-//   if (!userMsg) return;
-
-//   const chatLog = document.getElementById("chatLog");
-//   chatLog.innerHTML += `<p><strong>You:</strong> ${userMsg}</p>`;
-//   chatLog.scrollTop = chatLog.scrollHeight;
-
-//   const shoppingItems = parseShoppingList(userMsg);
-//   if (shoppingItems.length > 0) {
-//     queueProductSimulations(shoppingItems);
-//   }
-
-//   try {
-//     const res = await fetch("http://localhost:4000/chat", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ message: userMsg }),
-//     });
-
-//     const data = await res.json();
-//     const botReply = data.reply;
-
-//     chatLog.innerHTML += `<p><strong>Bot:</strong> ${botReply.replace(/\n/g, "<br>")}</p>`;
-//     chatLog.scrollTop = chatLog.scrollHeight;
-//   } catch (err) {
-//     console.error("Chat error:", err);
-//     chatLog.innerHTML += `<p><strong>Bot:</strong> Sorry, something went wrong.</p>`;
-//   }
-
-//   document.getElementById("chatInput").value = "";
-// }
-
 async function sendChat() {
   const userMsg = document.getElementById("chatInput").value.trim();
   if (!userMsg) return;
@@ -246,24 +244,13 @@ async function sendChat() {
   chatLog.innerHTML += `<p><strong>You:</strong> ${userMsg}</p>`;
   chatLog.scrollTop = chatLog.scrollHeight;
 
-  // 🧠 Don't proceed if mode not selected
   if (!currentMode) {
     chatLog.innerHTML += `<p><strong>Bot:</strong> Please select a mode first: 💡 General Query or 🛒 Shopping Mode.</p>`;
     return;
   }
 
-  // Clear chat input regardless of mode
   document.getElementById("chatInput").value = "";
 
-  // 🧾 Optional: parse items only in shopping mode
-  if (currentMode === 'order') {
-    const shoppingItems = parseShoppingList(userMsg);
-    if (shoppingItems.length > 0) {
-      queueProductSimulations(shoppingItems);
-    }
-  }
-
-  // Determine endpoint
   const endpoint = currentMode === 'general'
     ? 'http://localhost:4000/general'
     : 'http://localhost:4000/chat';
@@ -281,9 +268,30 @@ async function sendChat() {
     chatLog.innerHTML += `<p><strong>Bot:</strong> ${botReply.replace(/\n/g, "<br>")}</p>`;
     chatLog.scrollTop = chatLog.scrollHeight;
 
+    parseAddToCartFromReply(botReply);
   } catch (err) {
     console.error("Chat error:", err);
     chatLog.innerHTML += `<p><strong>Bot:</strong> Sorry, something went wrong.</p>`;
+  }
+}
+
+function parseAddToCartFromReply(reply) {
+  const addRegex = /Added\s+(\d+)\s+x\s+(.+?)\s+\(₹(\d+)/i;
+  const match = reply.match(addRegex);
+
+  if (match) {
+    const quantity = parseInt(match[1]);
+    const productName = match[2].trim().toLowerCase();
+
+    const matched = products.find(p =>
+      p.name.toLowerCase() === productName || p.name.toLowerCase().includes(productName)
+    );
+
+    if (matched) {
+      addToCart(matched._id, quantity);
+    } else {
+      console.warn("⚠️ Product not found in local products list:", productName);
+    }
   }
 }
 

@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Coca-Cola Bottle",
+    "price": 20,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Pepsi Can",
+    "price": 25,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Basmati Rice 1kg",
+    "price": 80,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Toothpaste",
+    "price": 45,
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "name": "Handwash",
+    "price": 60,
+    "image": "https://via.placeholder.com/100"
+  }
+]
