@@ -21,6 +21,11 @@
       <button onclick="startVoiceInput()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">🎤 Voice</button>
       <a href="cart.html" class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-blue-100">🛒 Cart</a>
       <a href="profile.html" class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-blue-100">👤 Profile</a>
+        <label for="captionImageInput" class="bg-yellow-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-yellow-600">
+    📸 Upload Product Image
+  </label>
+  <input type="file" id="captionImageInput" accept="image/*" onchange="handleImageCaptionSearch(event)" class="hidden" />
+
     </div>
   </header>
 
@@ -55,7 +60,7 @@
   </div>
 </div>
 
-    <input id="chatInput" type="text" placeholder="Type your message..."
+    <!-- <input id="chatInput" type="text" placeholder="Type your message..."
       class="border mt-3 px-4 py-2 rounded w-full" />
     <div class="flex gap-2 mt-2">
       <button onclick="sendChat()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">Send</button>
@@ -65,10 +70,38 @@
         onchange="handleChatImageUpload(event)"
         class="w-full px-2 py-1 border rounded text-sm" />
     </div>
-  </div>
+  </div> -->
+  <!-- Existing input + buttons -->
+<input id="chatInput" type="text" placeholder="Type your message..."
+  class="border mt-3 px-4 py-2 rounded w-full" />
+
+<div class="flex gap-2 mt-2">
+  <button onclick="sendChat()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">Send</button>
+  <button id="micToggle" onclick="toggleMic()"
+    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">🎤 Mic On</button>
+</div>
+
+<!-- 🧾 Existing list upload -->
+<input type="file" id="chatImageUpload" accept="image/*"
+  onchange="handleChatImageUpload(event)"
+  class="w-full px-2 py-1 border rounded text-sm mt-2" />
+
+<!-- 📸 New BLIP Product Caption Upload -->
+<div class="flex gap-2 mt-2 items-center">
+  <label for="captionImageInput"
+    class="bg-yellow-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-yellow-600 text-center w-full">
+    📸 Upload Product Image
+  </label>
+  <input type="file" id="captionImageInput" accept="image/*"
+    onchange="handleImageCaptionSearch(event)" class="hidden" />
+</div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
   <script src="scripts.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+
+
   <script>
     let micOn = false;
     let recognition;

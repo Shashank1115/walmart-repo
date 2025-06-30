@@ -286,4 +286,105 @@ async function sendChat() {
   }
 }
 
+async function handleImageCaptionSearch(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function () {
+    const imageData = reader.result;
+    const chatLog = document.getElementById("chatLog");
+
+    try {
+      chatLog.innerHTML += `<p><strong>Bot:</strong> 📸 Uploading image...</p>`;
+
+      // Step 1: Get caption from Flask server
+      const res = await fetch("http://localhost:5000/caption", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: imageData })
+      });
+
+      if (!res.ok) throw new Error(`Flask server returned ${res.status}`);
+
+      const data = await res.json();
+      const caption = data.caption || "unknown object";
+      chatLog.innerHTML += `<p><strong>Bot:</strong> Detected caption: "${caption}"</p>`;
+
+      // Step 2: Use LLM to extract clean product name
+      const llmRes = await fetch("http://localhost:4000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `The image caption is: "${caption}". Your job is to match it to the closest product name in our grocery and electronics catalog. 
+NEVER say "sorry", "no matching product", or "I don’t know". 
+If unsure, reply with the closest match like "TV Screen", "Milk Bottle", or "Amul Milk". 
+Your answer should ONLY be the product name and nothing else.`
+
+        })
+      });
+
+      const llmData = await llmRes.json();
+      let rawReply = llmData?.reply?.trim().toLowerCase() || "";
+
+      // Step 3: Validate LLM reply
+      if (
+        !rawReply ||
+        rawReply === "none" ||
+        rawReply === "null" ||
+        rawReply.includes("sorry") ||
+        rawReply.includes("don’t have") ||
+        rawReply.includes("do not have") ||
+        rawReply.includes("not sure")
+      ) {
+        chatLog.innerHTML += `<p><strong>Bot:</strong> 🤖 I couldn't confidently detect a product. Try a different image.</p>`;
+        return;
+      }
+
+      // Step 4: Clean product name
+      const cleanedProduct = rawReply.replace(/[^a-zA-Z0-9\s]/g, "").trim();
+
+      chatLog.innerHTML += `<p><strong>Bot:</strong> 🔍 Searching for: "${cleanedProduct}"</p>`;
+      searchProductsByText(cleanedProduct);
+
+    } catch (err) {
+      console.error("Image captioning error:", err);
+      chatLog.innerHTML += `<p><strong>Bot:</strong> ❌ Error: ${err.message}</p>`;
+    }
+  };
+
+  reader.readAsDataURL(file);
+}
+
+
+function searchProductsByText(text) {
+  if (!products || products.length === 0) return;
+
+  const chatLog = document.getElementById("chatLog");
+
+  // Fuzzy search using Fuse.js
+  const fuse = new Fuse(products, {
+    keys: ['name'],
+    threshold: 0.4,
+    distance: 100,
+    minMatchCharLength: 2
+  });
+
+  const results = fuse.search(text);
+  const matched = results.map(r => r.item);
+
+  chatLog.innerHTML += `<p><strong>Bot:</strong> Detected product: "${text}"</p>`;
+
+  if (matched.length > 0) {
+    renderProductList(matched);
+    chatLog.innerHTML += `<p><strong>Bot:</strong> Found ${matched.length} matching product(s).</p>`;
+  } else {
+    chatLog.innerHTML += `<p><strong>Bot:</strong> No matching product found for "${text}".</p>`;
+  }
+
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+
+
 renderProducts();

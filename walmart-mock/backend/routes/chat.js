@@ -13,7 +13,9 @@ const productCatalog = [
   { name: "Coca-Cola Bottle", price: 20 },
   { name: "Amul Milk 1L", price: 50 },
   { name: "Basmati Rice 1kg", price: 80 },
-  { name: "India Gate Rice 1kg", price: 90 }
+  { name: "India Gate Rice 1kg", price: 90 },
+  { name: "Samsung 32-inch LED TV", price: 15999 },
+  { name: "LG 43-inch Smart LED TV", price: 27999 },
 ];
 
 const catalogString = productCatalog.map(p => `${p.name} — ₹${p.price}`).join("\n");
