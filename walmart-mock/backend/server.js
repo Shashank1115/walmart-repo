@@ -20,11 +20,15 @@ const productRoutes = require("./routes/productroutes");
 const chatRoutes = require("./routes/chat");
 const profileRoutes = require("./routes/profile");
 
+
+
+
 // Use the routes
 app.use("/api/products", productRoutes);
 app.use("/chat", chatRoutes);        // <-- POST /chat from scripts.js
 app.use("/profile", profileRoutes);  // <-- POST /profile/save and GET /profile/get
 app.use("/general", require("./routes/general"));
+app.use('/api/products', require('./routes/productroutes'));
 
 // Run server
 const PORT = 4000;

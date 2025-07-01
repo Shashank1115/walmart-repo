@@ -15,6 +15,17 @@ model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-capt
 
 @app.route("/caption", methods=["POST"])
 def generate_caption():
+    """
+    Endpoint to generate a caption for an image using BLIP.
+
+    Parameters:
+        image (str): base64 encoded image data
+
+    Returns:
+        dict: {"caption": str} if successful
+        dict: {"error": str} if failed
+    """
+
     try:
         data = request.json
         print("Received data:", data)

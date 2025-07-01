@@ -50,7 +50,7 @@
   </button>
 
   <!-- Chatbox UI -->
-  <div id="chatbox" class="hidden fixed bottom-24 right-5 w-[90%] sm:w-[400px] h-[550px] bg-white rounded-xl shadow-xl flex flex-col p-4 z-50">
+  <div id="chatbox" class="hidden fixed bottom-24 right-5 w-[90%] sm:w-[450px] h-[650px] bg-white rounded-xl shadow-xl flex flex-col p-4 z-50">
     <h3 class="text-lg font-semibold text-center mb-2">Smart Assistant</h3>
     <div id="chatLog" class="flex-1 overflow-y-auto border rounded p-2 bg-gray-50 space-y-2 text-sm">
   <div id="modeSelection" class="text-center">
@@ -60,25 +60,13 @@
   </div>
 </div>
 
-    <!-- <input id="chatInput" type="text" placeholder="Type your message..."
-      class="border mt-3 px-4 py-2 rounded w-full" />
-    <div class="flex gap-2 mt-2">
-      <button onclick="sendChat()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">Send</button>
-      <button id="micToggle" onclick="toggleMic()"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">🎤 Mic On</button>
-      <input type="file" id="chatImageUpload" accept="image/*"
-        onchange="handleChatImageUpload(event)"
-        class="w-full px-2 py-1 border rounded text-sm" />
-    </div>
-  </div> -->
-  <!-- Existing input + buttons -->
 <input id="chatInput" type="text" placeholder="Type your message..."
   class="border mt-3 px-4 py-2 rounded w-full" />
 
 <div class="flex gap-2 mt-2">
   <button onclick="sendChat()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">Send</button>
   <button id="micToggle" onclick="toggleMic()"
-    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">🎤 Mic On</button>
+    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"> Mic On</button>
 </div>
 
 <!-- 🧾 Existing list upload -->
@@ -90,16 +78,36 @@
 <div class="flex gap-2 mt-2 items-center">
   <label for="captionImageInput"
     class="bg-yellow-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-yellow-600 text-center w-full">
-    📸 Upload Product Image
+     Upload Product Image
   </label>
   <input type="file" id="captionImageInput" accept="image/*"
     onchange="handleImageCaptionSearch(event)" class="hidden" />
+    <!-- 📦 Barcode Scanner Button -->
+<button onclick="startBarcodeScanner()"
+  class="bg-purple-600 text-white px-4 py-2 rounded w-full hover:bg-purple-700 mt-2">
+   Scan Product Barcode
+</button>
+
+<!-- 🔍 Barcode Scanner Modal -->
+<div id="barcodeScannerModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+  <div class="bg-white rounded-lg p-4 w-[90%] max-w-md shadow-lg">
+    <h3 class="text-lg font-semibold mb-2">📷 Scan Barcode</h3>
+    <div id="barcode-scanner" class="border rounded-md"></div>
+    <button onclick="stopBarcodeScanner()"
+      class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full">Close</button>
+  </div>
+</div>
+
 </div>
 
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
   <script src="scripts.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+ <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+ <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
+
+
 
 
   <script>

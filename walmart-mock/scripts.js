@@ -131,6 +131,8 @@ function simulateOrderFromChat(productName, requestedQuantity = 1) {
   }, 1000);
 }
 
+// This function takes an array of items and simulates the order of each item in the array
+//This function takes an array of items and simulates a product simulation for each item in the array
 function queueProductSimulations(items) {
   const added = new Set();
   items.forEach((item, index) => {
@@ -385,6 +387,71 @@ function searchProductsByText(text) {
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
+let html5QrCode;
+
+async function startBarcodeScanner() {
+  document.getElementById("barcodeScannerModal").classList.remove("hidden");
+
+  const scannerEl = document.getElementById("barcode-scanner");
+  html5QrCode = new Html5Qrcode("barcode-scanner");
+
+  try {
+    await html5QrCode.start(
+      { facingMode: "environment" }, // Rear camera
+      {
+        fps: 10,
+        qrbox: { width: 250, height: 100 }
+      },
+      async (decodedText, decodedResult) => {
+        console.log("✅ Barcode detected:", decodedText);
+        stopBarcodeScanner();
+
+        const chatLog = document.getElementById("chatLog");
+        chatLog.innerHTML += `<p><strong>Bot:</strong> Scanned Barcode: "${decodedText}"</p>`;
+
+        // Call backend with scanned barcode
+        const res = await fetch(`http://localhost:4000/api/products/barcode/${decodedText}`);
+        const data = await res.json();
+
+        if (data && data.name) {
+          chatLog.innerHTML += `<p><strong>Bot:</strong> Matched: ${data.name}</p>`;
+          simulateOrderFromChat(data.name, 1); // auto-add to cart
+        } else {
+          chatLog.innerHTML += `<p><strong>Bot:</strong> No matching product found for barcode.</p>`;
+        }
+      },
+      err => {
+        // Ignore scan errors
+      }
+    );
+  } catch (err) {
+    console.error("Camera start error:", err);
+    alert("Camera access failed.");
+    closeBarcodeScanner();
+  }
+}
+
+function stopBarcodeScanner() {
+  if (html5QrCode) {
+    html5QrCode.stop()
+      .then(() => {
+        html5QrCode.clear();
+        html5QrCode = null; // 🧹 Clean up reference
+        closeBarcodeScanner(); // Now hide modal
+      })
+      .catch(err => {
+        console.error("❌ Failed to stop scanner:", err);
+        closeBarcodeScanner(); // Still hide UI
+      });
+  } else {
+    closeBarcodeScanner(); // fallback
+  }
+}
+
+
+function closeBarcodeScanner() {
+  document.getElementById("barcodeScannerModal").classList.add("hidden");
+}
 
 
 renderProducts();
