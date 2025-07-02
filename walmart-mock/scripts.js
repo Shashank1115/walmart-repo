@@ -64,17 +64,72 @@ function showCart() {
 
 function parseShoppingList(text) {
   const productsList = [
-    "Basmati Rice",
-    "Amul Milk",
     "Coca-Cola Bottle",
-    "India Gate Rice"
+    "Amul Milk 1L",
+    "Basmati Rice 1kg",
+    "India Gate Rice 1kg",
+    "Samsung 32-inch LED TV",
+    "LG 43-inch Smart LED TV",
+    "Ziploc Sandwich Bags 100 ct",
+    "Rubbermaid Food Storage Set",
+    "Pyrex Glass Measuring Cup",
+    "KitchenAid Classic Peeler",
+    "Farberware Knife Set",
+    "Hamilton Beach Toaster",
+    "Oster Blender 700W",
+    "Crock-Pot Slow Cooker",
+    "Instant Pot Duo 7-in-1",
+    "Ninja Air Fryer 4qt",
+    "GE LED Light Bulbs 60W",
+    "Energizer AA Batteries 20 ct",
+    "Duracell AAA Batteries 24 ct",
+    "Scotch Magic Tape 3 Pack",
+    "BIC Ballpoint Pens 10 ct",
+    "Sharpie Permanent Markers 5 ct",
+    "Crayola Colored Pencils 24 ct",
+    "Elmer's Glue-All 225ml",
+    "Expo Dry Erase Markers 8 ct",
+    "Five Star Spiral Notebook",
+    "Post-it Notes 3x3 12 ct",
+    "Great Value Paper Towels 6 Rolls",
+    "Bounty Select-A-Size 8 Rolls",
+    "Charmin Ultra Soft 12 Rolls",
+    "Scott Toilet Paper 18 Rolls",
+    "Kleenex Facial Tissue 4 Pack",
+    "Great Value Facial Tissues 3 Pack",
+    "Equate Cough Syrup",
+    "Great Value Frozen Pizza",
+    "Great Value Shredded Cheese",
+    "Sam's Choice Angus Beef Patties",
+    "Great Value Orange Juice 1L",
+    "Great Value Frozen Mixed Veggies",
+    "Equate First Aid Kit",
+    "Ozark Trail Stainless Bottle",
+    "Hyper Tough Screwdriver Set",
+    "Great Value Butter 500g",
+    "Equate Sunscreen SPF 50",
+    "Equate Epsom Salt 1kg",
+    "Better Homes Comforter Set",
+    "Mainstays Table Lamp",
+    "Great Value Greek Yogurt",
+    "Great Value Coffee Creamer",
+    "Equate Sleep Aid Tablets",
+    "Mainstays Shower Curtain",
+    "Great Value Honey 250g",
+    "Sam’s Choice Trail Mix",
+    "Equate Pregnancy Test Kit",
+    "Great Value Brown Sugar",
+    "Equate Vitamin D Tablets",
+    "Equate Hand Wash 500ml",
+    "Mainstays Non-Stick Fry Pan",
+    "Better Homes Bath Towel Set"
   ];
 
   const items = [];
   const seen = new Set();
 
   for (const name of productsList) {
-    const regex = new RegExp(`(\\d+)?\\s*(kg|l|liters?|packs?|bottles?)?\\s*(?:of\\s*)?${name}|${name}\\s*(\\d+)\\s*(kg|l|liters?|packs?|bottles?)?`, "gi");
+    const regex = new RegExp(`(\\d+)?\\s*(kg|l|liters?|packs?|bottles?|ct|inch|ml|g)?\\s*(?:of\\s*)?${name}|${name}\\s*(\\d+)\\s*(kg|l|liters?|packs?|bottles?|ct|inch|ml|g)?`, "gi");
     let match;
 
     while ((match = regex.exec(text)) !== null) {
@@ -91,6 +146,7 @@ function parseShoppingList(text) {
 
   return items;
 }
+
 
 function simulateOrderFromChat(productName, requestedQuantity = 1) {
   const searchBar = document.getElementById("searchInput");
@@ -205,40 +261,6 @@ function handleImageUpload(event) {
   };
   reader.readAsDataURL(file);
 }
-
-// async function sendChat() {
-//   const userMsg = document.getElementById("chatInput").value.trim();
-//   if (!userMsg) return;
-
-//   const chatLog = document.getElementById("chatLog");
-//   chatLog.innerHTML += `<p><strong>You:</strong> ${userMsg}</p>`;
-//   chatLog.scrollTop = chatLog.scrollHeight;
-
-//   const shoppingItems = parseShoppingList(userMsg);
-//   if (shoppingItems.length > 0) {
-//     queueProductSimulations(shoppingItems);
-//   }
-
-//   try {
-//     const res = await fetch("http://localhost:4000/chat", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ message: userMsg }),
-//     });
-
-//     const data = await res.json();
-//     const botReply = data.reply;
-
-//     chatLog.innerHTML += `<p><strong>Bot:</strong> ${botReply.replace(/\n/g, "<br>")}</p>`;
-//     chatLog.scrollTop = chatLog.scrollHeight;
-//   } catch (err) {
-//     console.error("Chat error:", err);
-//     chatLog.innerHTML += `<p><strong>Bot:</strong> Sorry, something went wrong.</p>`;
-//   }
-
-//   document.getElementById("chatInput").value = "";
-// }
-
 async function sendChat() {
   const userMsg = document.getElementById("chatInput").value.trim();
   if (!userMsg) return;
@@ -298,7 +320,7 @@ async function handleImageCaptionSearch(event) {
     const chatLog = document.getElementById("chatLog");
 
     try {
-      chatLog.innerHTML += `<p><strong>Bot:</strong> 📸 Uploading image...</p>`;
+      chatLog.innerHTML += `<p><strong>Bot:</strong>  Uploading image...</p>`;
 
       // Step 1: Get caption from Flask server
       const res = await fetch("http://localhost:5000/caption", {
@@ -339,19 +361,19 @@ Your answer should ONLY be the product name and nothing else.`
         rawReply.includes("do not have") ||
         rawReply.includes("not sure")
       ) {
-        chatLog.innerHTML += `<p><strong>Bot:</strong> 🤖 I couldn't confidently detect a product. Try a different image.</p>`;
+        chatLog.innerHTML += `<p><strong>Bot:</strong>  I couldn't confidently detect a product. Try a different image.</p>`;
         return;
       }
 
       // Step 4: Clean product name
       const cleanedProduct = rawReply.replace(/[^a-zA-Z0-9\s]/g, "").trim();
 
-      chatLog.innerHTML += `<p><strong>Bot:</strong> 🔍 Searching for: "${cleanedProduct}"</p>`;
+      chatLog.innerHTML += `<p><strong>Bot:</strong> Searching for: "${cleanedProduct}"</p>`;
       searchProductsByText(cleanedProduct);
 
     } catch (err) {
       console.error("Image captioning error:", err);
-      chatLog.innerHTML += `<p><strong>Bot:</strong> ❌ Error: ${err.message}</p>`;
+      chatLog.innerHTML += `<p><strong>Bot:</strong>  Error: ${err.message}</p>`;
     }
   };
 
